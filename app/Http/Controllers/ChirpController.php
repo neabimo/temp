@@ -34,10 +34,14 @@ class ChirpController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'message' => 'required|string|max:255',
-        ], [
-            'message.required' => 'Please write something to chirp!',
-            'message.max' => 'Chirps must be 255 characters or less.',
+            'message' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('chirps')->where(function ($query) use ($user) {
+                    return $query->where('user_id', $user->id);
+                })
+            ],
         ]);
     
         \App\Models\Chirp::create([
@@ -45,7 +49,7 @@ class ChirpController extends Controller
             'user_id' => null,
         ]);
     
-        return redirect('/')->with('success', 'Your chirp has been posted!');
+        return redirect('/bootcamp')->with('success', 'chirp posted!');
     }
 
     /**
@@ -59,24 +63,29 @@ class ChirpController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Chirp $chirp)
     {
-        //
+        // We'll add authorization in lesson 11
+        return view('chirps.edit', compact('chirp'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    
+    public function update(Request $request, Chirp $chirp)
     {
-        //
+        // Validate
+        $validated = $request->validate([
+            'message' => 'required|string|max:255',
+        ]);
+    
+        // Update
+        $chirp->update($validated);
+    
+        return redirect('/bootcamp')->with('success', 'Chirp updated!');
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    
+    public function destroy(Chirp $chirp)
     {
-        //
+        $chirp->delete();
+    
+        return redirect('/bootcamp')->with('success', 'Chirp deleted!');
     }
 }
