@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChirpController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::post('/chirps', [ChirpController::class, 'store']);
+Route::get('/bootcamp', [ChirpController::class, 'index']);
+
+
+
